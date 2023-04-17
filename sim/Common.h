@@ -9,9 +9,10 @@
 
 using namespace std;
 
+template<typename T>
 class MemRef {
 public:
-  MemRef(float* allocated, float* aligned, int64_t offset, vector<int64_t>& sizes, vector<int64_t>& strides, int dim) {
+  MemRef(T* allocated, T* aligned, int64_t offset, vector<int64_t>& sizes, vector<int64_t>& strides, int dim) {
     this->allocated = allocated;
     this->aligned = aligned;
     this->offset = offset;
@@ -20,35 +21,39 @@ public:
     this->dim = dim;
   }
 
-  float* allocated;
-  float* aligned;
+  T* allocated;
+  T* aligned;
   int64_t offset;
   vector<int64_t> sizes;
   vector<int64_t> strides;
   int dim;
 };
 
+template<typename T>
 class DataReq {
 public:
   DataReq(){}
-  void assembleReq(MemRef& memRef) {
+  void assembleReq(MemRef<T>& memRef) {
     memRefs.push_back(memRef);
   }
 
-  vector<MemRef> memRefs;
+  vector<MemRef<T>> memRefs;
 };
 
-class Simulator;
 
-using pfunc = void (*)(DataReq&, DataReq&, Simulator&);
+template<typename T> class Simulator;
 
+template<typename T>
+using pfunc = void (*)(DataReq<T>&, DataReq<T>&, Simulator<T>&);
+
+template<typename T>
 class Simulator {
 public:
   Simulator(int, int);
   void enableDoubleBuffer();
-  void issueRD(DataReq&);
+  void issueRD(DataReq<T>&);
   void issueEX(string, int64_t);
-  void issueWR(DataReq&, bool);
+  void issueWR(DataReq<T>&, bool);
   int64_t getTotalCycles();
   map<string, int> matmulLocCount;
   int dimX;
@@ -61,7 +66,7 @@ private:
   bool doubleBufferEnabled;
   // These data struct could be replaced by queue if
   // we are targeting multi-threading
-  DataReq currentInput[2];
+  DataReq<T> currentInput[2];
   string currentOperation[2];
   
   int64_t lastRDCompleteCycle[2];
@@ -72,7 +77,7 @@ private:
   int wrIndex = 0;
   // A typical DMA @ 400MHz (32b/cycle)
   float DMASpeed = 32;
-  map<string, pfunc> exFuncMap;
+  map<string, pfunc<T>> exFuncMap;
 };
 
 #endif

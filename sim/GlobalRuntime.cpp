@@ -16,7 +16,7 @@
 
 using namespace std;
 
-extern Simulator* cgra;
+extern Simulator<float>* cgra;
 
 extern "C" void cgra_matmul(float* a_allocated, float* a_aligned, int64_t a_offset, int64_t a_size0, int64_t a_size1, int64_t a_stride0, int64_t a_stride1,
                  float* b_allocated, float* b_aligned, int64_t b_offset, int64_t b_size0, int64_t b_size1, int64_t b_stride0, int64_t b_stride1,
@@ -25,22 +25,22 @@ extern "C" void cgra_matmul(float* a_allocated, float* a_aligned, int64_t a_offs
   // prepare inputs
   vector<int64_t> a_sizes = {a_size0, a_size1};
   vector<int64_t> a_strides = {a_stride0, a_stride1};
-  MemRef memRef0(a_allocated, a_aligned, a_offset, a_sizes, a_strides, 2);
+  MemRef<float> memRef0(a_allocated, a_aligned, a_offset, a_sizes, a_strides, 2);
 
   vector<int64_t> b_sizes = {b_size0, b_size1};
   vector<int64_t> b_strides = {b_stride0, b_stride1};
-  MemRef memRef1(b_allocated, b_aligned, b_offset, b_sizes, b_strides, 2);
+  MemRef<float> memRef1(b_allocated, b_aligned, b_offset, b_sizes, b_strides, 2);
 
-  DataReq input;
+  DataReq<float> input;
   input.assembleReq(memRef0);
   input.assembleReq(memRef1);
 
   // prepare outputs
   vector<int64_t> c_sizes = {c_size0, c_size1};
   vector<int64_t> c_strides = {c_stride0, c_stride1};
-  MemRef memRef2(c_allocated, c_aligned, c_offset, c_sizes, c_strides, 2);
+  MemRef<float> memRef2(c_allocated, c_aligned, c_offset, c_sizes, c_strides, 2);
 
-  DataReq output;
+  DataReq<float> output;
   output.assembleReq(memRef2);
 
   // issue READ/EXECUTE/WRITE requests for simulation
@@ -56,22 +56,22 @@ extern "C" void cgra_batch_matmul(float* a_allocated, float* a_aligned, int64_t 
   // prepare inputs
   vector<int64_t> a_sizes = {a_size0, a_size1, a_size2};
   vector<int64_t> a_strides = {a_stride0, a_stride1, a_stride2};
-  MemRef memRef0(a_allocated, a_aligned, a_offset, a_sizes, a_strides, 3);
+  MemRef<float> memRef0(a_allocated, a_aligned, a_offset, a_sizes, a_strides, 3);
 
   vector<int64_t> b_sizes = {b_size0, b_size1, b_size2};
   vector<int64_t> b_strides = {b_stride0, b_stride1, b_stride2};
-  MemRef memRef1(b_allocated, b_aligned, b_offset, b_sizes, b_strides, 3);
+  MemRef<float> memRef1(b_allocated, b_aligned, b_offset, b_sizes, b_strides, 3);
 
-  DataReq input;
+  DataReq<float> input;
   input.assembleReq(memRef0);
   input.assembleReq(memRef1);
 
   // prepare outputs
   vector<int64_t> c_sizes = {c_size0, c_size1, c_size2};
   vector<int64_t> c_strides = {c_stride0, c_stride1, c_stride2};
-  MemRef memRef2(c_allocated, c_aligned, c_offset, c_sizes, c_strides, 3);
+  MemRef<float> memRef2(c_allocated, c_aligned, c_offset, c_sizes, c_strides, 3);
 
-  DataReq output;
+  DataReq<float> output;
   output.assembleReq(memRef2);
 
   // issue READ/EXECUTE/WRITE requests for simulation
@@ -97,17 +97,17 @@ extern "C" void cgra_fusion_add_max_add_0(float* a_allocated, float* a_aligned, 
   // prepare inputs
   vector<int64_t> a_sizes = {a_size0, a_size1};
   vector<int64_t> a_strides = {a_stride0, a_stride1};
-  MemRef memRef0(a_allocated, a_aligned, a_offset, a_sizes, a_strides, 2);
+  MemRef<float> memRef0(a_allocated, a_aligned, a_offset, a_sizes, a_strides, 2);
 
   vector<int64_t> b_sizes = {b_size0, b_size1};
   vector<int64_t> b_strides = {b_stride0, b_stride1};
-  MemRef memRef1(b_allocated, b_aligned, b_offset, b_sizes, b_strides, 2);
+  MemRef<float> memRef1(b_allocated, b_aligned, b_offset, b_sizes, b_strides, 2);
 
   vector<int64_t> c_sizes = {c_size0, c_size1};
   vector<int64_t> c_strides = {c_stride0, c_stride1};
-  MemRef memRef2(c_allocated, c_aligned, c_offset, c_sizes, c_strides, 2);
+  MemRef<float> memRef2(c_allocated, c_aligned, c_offset, c_sizes, c_strides, 2);
 
-  DataReq input;
+  DataReq<float> input;
   input.assembleReq(memRef0);
   input.assembleReq(memRef1);
   input.assembleReq(memRef2);
@@ -115,9 +115,9 @@ extern "C" void cgra_fusion_add_max_add_0(float* a_allocated, float* a_aligned, 
   // prepare outputs
   vector<int64_t> d_sizes = {d_size0, d_size1};
   vector<int64_t> d_strides = {d_stride0, d_stride1};
-  MemRef memRef3(d_allocated, d_aligned, d_offset, d_sizes, d_strides, 2);
+  MemRef<float> memRef3(d_allocated, d_aligned, d_offset, d_sizes, d_strides, 2);
 
-  DataReq output;
+  DataReq<float> output;
   output.assembleReq(memRef3);
 
   // issue READ/EXECUTE/WRITE requests for simulation

@@ -1,12 +1,12 @@
 
 #include "Common.h"
 
-void matmul(DataReq& input, DataReq& output, Simulator& sim) {
+void matmul(DataReq<float>& input, DataReq<float>& output, Simulator<float>& sim) {
 
 
-  MemRef inA = input.memRefs[0];
-  MemRef inB = input.memRefs[1];
-  MemRef out = output.memRefs[0];
+  MemRef<float> inA = input.memRefs[0];
+  MemRef<float> inB = input.memRefs[1];
+  MemRef<float> out = output.memRefs[0];
 
   // walk-around for the current bug in MLIR tiling memref
   int row = out.offset / (out.sizes[0] * out.strides[0]);
@@ -34,12 +34,12 @@ void matmul(DataReq& input, DataReq& output, Simulator& sim) {
   }
 }
 
-void batch_matmul(DataReq& input, DataReq& output, Simulator& sim) {
+void batch_matmul(DataReq<float>& input, DataReq<float>& output, Simulator<float>& sim) {
 
 
-  MemRef inA = input.memRefs[0];
-  MemRef inB = input.memRefs[1];
-  MemRef out = output.memRefs[0];
+  MemRef<float> inA = input.memRefs[0];
+  MemRef<float> inB = input.memRefs[1];
+  MemRef<float> out = output.memRefs[0];
 
   for (int b=0; b<out.sizes[0]; ++b) {
     for (int i=0; i<out.sizes[1]; ++i) {
@@ -52,12 +52,12 @@ void batch_matmul(DataReq& input, DataReq& output, Simulator& sim) {
   }
 }
 
-void fusion_add_max_add(DataReq& input, DataReq& output, Simulator& sim) {
+void fusion_add_max_add(DataReq<float>& input, DataReq<float>& output, Simulator<float>& sim) {
 
-  MemRef inA = input.memRefs[0];
-  MemRef inB = input.memRefs[1];
-  MemRef inC = input.memRefs[2];
-  MemRef out = output.memRefs[0];
+  MemRef<float> inA = input.memRefs[0];
+  MemRef<float> inB = input.memRefs[1];
+  MemRef<float> inC = input.memRefs[2];
+  MemRef<float> out = output.memRefs[0];
 
   for (int i=0; i<out.sizes[0]; ++i) {
     for (int j=0; j<out.sizes[1]; ++j) {

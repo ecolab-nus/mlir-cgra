@@ -4,7 +4,8 @@
 
 #include <iostream>
 
-Simulator::Simulator(int dimX, int dimY) {
+template<>
+Simulator<float>::Simulator(int dimX, int dimY) {
   // DMA speed in GB/s @1GHz => bytes/cycle
   this->doubleBufferEnabled = false;
   this->dimX = dimX;
@@ -20,17 +21,33 @@ Simulator::Simulator(int dimX, int dimY) {
   exFuncMap["fusion_add_max_add"] = fusion_add_max_add;
 }
 
-void Simulator::enableDoubleBuffer() {
+template<>
+Simulator<int>::Simulator(int dimX, int dimY) {
+  // DMA speed in GB/s @1GHz => bytes/cycle
+  this->doubleBufferEnabled = false;
+  this->dimX = dimX;
+  this->dimY = dimY;
+  // Usually, the II increases along with the size of the CGRA
+  // as larger CGRA lowers vectorized kernels. And vectorization
+  // leads to longer critical path (i.e., recII).
+  traditionalII = dimX;
+  isBaselineMode = false;
+}
+
+template<typename T>
+void Simulator<T>::enableDoubleBuffer() {
   this->doubleBufferEnabled = true;
 }
 
 // For baseline, all the kernels are mapped in the
 // traditional way.
-void Simulator::runAsBaseline() {
+template<typename T>
+void Simulator<T>::runAsBaseline() {
   isBaselineMode = true;
 }
 
-void Simulator::issueRD(DataReq& input) {
+template<typename T>
+void Simulator<T>::issueRD(DataReq<T>& input) {
 
   // prepare data for computation
   currentInput[rdIndex] = input;
@@ -55,10 +72,10 @@ void Simulator::issueRD(DataReq& input) {
 
   if (doubleBufferEnabled)
     rdIndex = rdIndex ^ 1;
-
 }
 
-void Simulator::issueEX(string operationType, int64_t loopBounds) {
+template<typename T>
+void Simulator<T>::issueEX(string operationType, int64_t loopBounds) {
 
   // calculate execution cycles (the computation is done during issueWR())
   currentOperation[exIndex] = operationType;
@@ -95,15 +112,16 @@ void Simulator::issueEX(string operationType, int64_t loopBounds) {
 
 }
 
-void Simulator::issueWR(DataReq& output, bool computeHere) {
+template<typename T>
+void Simulator<T>::issueWR(DataReq<T>& output, bool computeHere) {
 
   // prepare input and output for computation
-  DataReq& input = currentInput[wrIndex];
+  DataReq<T>& input = currentInput[wrIndex];
   string operation = currentOperation[wrIndex];
 
   // perform computation
   if (computeHere) {
-    pfunc f = exFuncMap[operation];
+    pfunc<T> f = exFuncMap[operation];
     (*f)(input, output, *this);
   }
 
@@ -131,6 +149,10 @@ void Simulator::issueWR(DataReq& output, bool computeHere) {
 
 }
 
-int64_t Simulator::getTotalCycles() {
+template<typename T>
+int64_t Simulator<T>::getTotalCycles() {
   return max(lastWRCompleteCycle[0], lastWRCompleteCycle[1]);
 }
+
+template class Simulator<float>;
+template class Simulator<int>;
