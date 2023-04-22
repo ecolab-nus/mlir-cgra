@@ -7,6 +7,9 @@
 #include "mlir/Pass/Pass.h"
 
 namespace mlir {
+namespace morpher {
+class MorpherDialect;
+}
 namespace func {
 class FuncOp;
 }

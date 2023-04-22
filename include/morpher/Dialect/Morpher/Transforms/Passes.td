@@ -13,6 +13,9 @@ include "mlir/Pass/PassBase.td"
 def MarkMapRegion : Pass<"mark-map-region", "::mlir::func::FuncOp"> {
   let summary = "Mark the region to be mapped in morpher dfg generator";
   let constructor = "mlir::morpher::createMarkMapRegionPass()";
+  let dependentDialects = [
+    "mlir::morpher::MorpherDialect"
+  ];
 }
 
 #endif // MLIR_DIALECT_MORPHER_PASSES

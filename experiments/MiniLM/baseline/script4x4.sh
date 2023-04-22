@@ -1,5 +1,5 @@
 # perform operation fusion
-mlir-opt --linalg-fuse-elementwise-ops 02-linalg.mlir > 03-fused.mlir
+mlir-opt --linalg-fuse-elementwise-ops 02-linalg-elide.mlir > 03-fused.mlir
 
 # perform finalization
 mlir-opt --canonicalize -convert-tensor-to-linalg -linalg-init-tensor-to-alloc-tensor -eliminate-alloc-tensors   -linalg-bufferize -arith-bufferize   -tensor-bufferize -func-bufferize   -finalizing-bufferize -buffer-deallocation   --buffer-results-to-out-params   --canonicalize -cse 03-fused.mlir > 04-finalized.mlir
@@ -35,7 +35,7 @@ llc -filetype=obj 12-accel-4.ll
 python ../../../tools/generateCustomizedRuntime.py 08-accel-4.mlir > CustomizedRuntime-4.cpp
 
 # compile for simulation
-clang++-12 main.cpp 11-model-4.o 12-accel-4.o ../../../../llvm-project/build/lib/libmlir_c_runner_utils.so CustomizedRuntime-4.cpp -I../../../sim/ ../../../sim/*.cpp -o simulate_4
+clang++ main.cpp 11-model-4.o 12-accel-4.o ../../../../llvm-project/build/lib/libmlir_c_runner_utils.so CustomizedRuntime-4.cpp -I../../../sim/ ../../../sim/*.cpp -o simulate_4
 
 ./simulate_4 4 false true
 

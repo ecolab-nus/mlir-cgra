@@ -67,10 +67,12 @@ void findInnerBody(Operation* op, llvm::SmallVectorImpl<Operation *> *inner_ops)
 
 /// Add MarkMapOp to region.
 void insertMarkMapOp(Operation *op) {
+  llvm::errs() << "insert mark for " << *op << "\n";
   assert(op->getNumRegions() > 0 && "Should mark operation with at lease one region!");
-  OpBuilder builder(op->getRegion(0));
-  builder.setInsertionPointToStart(op->getBlock());
-  builder.create<morpher::MapHintOp>(op->getBlock()->front().getLoc());
+  OpBuilder builder(op->getContext());
+  auto blk = &op->getRegion(0).front();
+  builder.setInsertionPointToStart(blk);
+  builder.create<morpher::MapHintOp>(blk->front().getLoc());
 }
 
 class MarkMapRegion : public mlir::morpher::MarkMapRegionBase<MarkMapRegion> {
