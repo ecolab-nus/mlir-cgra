@@ -43,6 +43,7 @@ else()
 endif()
 
 add_subdirectory(include/soda)
+add_subdirectory(include/morpher)
 add_subdirectory(lib)
 add_subdirectory(test)
 add_subdirectory(tools)

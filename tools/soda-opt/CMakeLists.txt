@@ -59,6 +59,10 @@ set(LIBS
   # SNN
   MLIRSNNOps
   MLIRSNNTransforms
+
+  # Morpher
+  MLIRMorpherOps
+  MLIRMorpherTransforms
 )
 
 set(SOURCES

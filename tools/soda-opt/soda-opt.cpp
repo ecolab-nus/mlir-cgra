@@ -22,6 +22,9 @@
 #include "soda/Misc/Passes.h"
 #include "soda/Misc/Pipelines.h"
 
+#include "morpher/Dialect/Morpher/IR/MorpherDialect.h"
+#include "morpher/Dialect/Morpher/Transforms/Passes.h"
+
 #include "mlir/Dialect/Arithmetic/Transforms/Passes.h"
 #include "mlir/Dialect/Func/Transforms/Passes.h"
 
@@ -114,6 +117,7 @@ int main(int argc, char **argv) {
   // Dialects
   registry.insert<mlir::soda::SODADialect>();
   registry.insert<mlir::snn::SNNDialect>();
+  registry.insert<mlir::morpher::MorpherDialect>();
 
   // ----- SODA -----
   // Misc passes
@@ -156,6 +160,9 @@ int main(int argc, char **argv) {
   mlir::soda::registerSimpleLoweringPass();
   mlir::soda::registerOptimizedForBambuPass();
   mlir::soda::registerOptimizedForVitisHLSPass();
+
+  // ----- Morpher -----
+  mlir::morpher::registerMorpherPasses();
 
   // Conversion passes
 
