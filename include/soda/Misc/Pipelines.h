@@ -12,6 +12,7 @@
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassManager.h"
 #include "soda/Misc/Passes.h"
+#include "morpher/Dialect/Morpher/Transforms/Passes.h"
 
 // TODO include for soda custom passes
 // #include "soda/Misc/Passes.h"
@@ -239,6 +240,8 @@ void registerSimpleLoweringPass() {
       "optimizations",
       [](OpPassManager &pm, const SimpleOptions &options) {
         pm.addPass(createConvertLinalgToAffineLoopsPass());
+        pm.addPass(mlir::morpher::createMarkMapRegionPass());
+        pm.addPass(mlir::morpher::createLegalizeMorpherPass());
         pm.addPass(createLowerAffinePass());
         pm.addPass(createCanonicalizerPass());
         pm.addPass(createCSEPass()); // Only has impact outside linalg ops

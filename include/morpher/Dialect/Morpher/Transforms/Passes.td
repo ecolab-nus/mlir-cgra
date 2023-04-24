@@ -18,4 +18,13 @@ def MarkMapRegion : Pass<"mark-map-region", "::mlir::func::FuncOp"> {
   ];
 }
 
+def LegalizeMorpher : Pass<"legalize-morpher", "::mlir::ModuleOp"> {
+  let summary = "Lower morpher dialects to native supported dialects (func/std...)";
+  let constructor = "mlir::morpher::createLegalizeMorpherPass()";
+  let dependentDialects = [
+    "mlir::morpher::MorpherDialect",
+    "mlir::func::FuncDialect"
+  ];
+}
+
 #endif // MLIR_DIALECT_MORPHER_PASSES

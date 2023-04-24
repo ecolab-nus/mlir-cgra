@@ -18,6 +18,7 @@ include "mlir/IR/OpBase.td"
 def Morpher_Dialect : Dialect {
   let name = "morpher";
   let cppNamespace = "::mlir::morpher";
+
 }
 
 class Morpher_Op<string mnemonic, list<Trait> traits = []> :
@@ -26,6 +27,9 @@ class Morpher_Op<string mnemonic, list<Trait> traits = []> :
 def Morpher_MapHintOp : Morpher_Op<"map_hint"> {
   let summary = "A hint for mapping a morpher kernel";
   let assemblyFormat = "attr-dict";
+  let extraClassDeclaration = [{
+  static llvm::StringRef mapHintFuncName() { return "please_map_me"; }
+  }];
 }
 
 #endif // MORPHER_MORPHER_OPS

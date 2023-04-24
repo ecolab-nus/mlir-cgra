@@ -8,15 +8,20 @@
 #include <memory>
 
 namespace mlir {
+class ModuleOp;
 namespace func {
 class FuncOp;
 } // namespace func
 
 namespace morpher {
 
-/// This pass automatically analyze affine.for loops and mark the inner-most body with MapRegionOp,
-/// which will be lowered to please_map_me() function and passed to morpher dfg generator.
+/// This pass automatically analyze affine.for loops and mark the inner-most
+/// body with MapRegionOp, which will be lowered to please_map_me() function and
+/// passed to morpher dfg generator.
 std::unique_ptr<OperationPass<func::FuncOp>> createMarkMapRegionPass();
+
+/// This pass lower morpher ops to native dialects.
+std::unique_ptr<OperationPass<ModuleOp>> createLegalizeMorpherPass();
 
 // Include autogen pass registration
 #define GEN_PASS_REGISTRATION

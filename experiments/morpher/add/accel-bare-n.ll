@@ -6,6 +6,8 @@ declare ptr @malloc(i64)
 
 declare void @free(ptr)
 
+declare dso_local i32 @please_map_me(...) local_unnamed_addr #0
+
 define void @generic_0(ptr %0, ptr %1, ptr %2) !dbg !3 {
   %4 = insertvalue { ptr, ptr, i64, [1 x i64], [1 x i64] } undef, ptr %0, 0, !dbg !7
   %5 = insertvalue { ptr, ptr, i64, [1 x i64], [1 x i64] } %4, ptr %0, 1, !dbg !9
@@ -27,7 +29,7 @@ define void @generic_0(ptr %0, ptr %1, ptr %2) !dbg !3 {
 19:                                               ; preds = %22, %3
   %20 = phi i64 [ %32, %22 ], [ 0, %3 ]
   %21 = icmp slt i64 %20, 20, !dbg !24
-  br i1 %21, label %22, label %33, !dbg !25
+  br i1 %21, label %22, label %34, !dbg !25
 
 22:                                               ; preds = %19
   %23 = extractvalue { ptr, ptr, i64, [1 x i64], [1 x i64] } %8, 1, !dbg !26
@@ -41,9 +43,10 @@ define void @generic_0(ptr %0, ptr %1, ptr %2) !dbg !3 {
   %31 = getelementptr i32, ptr %30, i64 %20, !dbg !34
   store i32 %29, ptr %31, align 4, !dbg !35
   %32 = add i64 %20, 1, !dbg !36
+  %33 = tail call i32 bitcast (i32 (...)* @please_map_me to i32 ()*)() #1
   br label %19, !dbg !37
 
-33:                                               ; preds = %19
+34:                                               ; preds = %19
   ret void, !dbg !38
 }
 
@@ -54,7 +57,7 @@ define void @generic_0(ptr %0, ptr %1, ptr %2) !dbg !3 {
 !1 = !DIFile(filename: "LLVMDialectModule", directory: "/")
 !2 = !{i32 2, !"Debug Info Version", i32 3}
 !3 = distinct !DISubprogram(name: "generic_0", linkageName: "generic_0", scope: null, file: !4, line: 2, type: !5, scopeLine: 2, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !0, retainedNodes: !6)
-!4 = !DIFile(filename: "accel-bare.mlir", directory: "/home/huiying/mlir-cgra/experiments/demo/add")
+!4 = !DIFile(filename: "accel-bare.mlir", directory: "/home/huiying//mlir-cgra/experiments/demo/add")
 !5 = !DISubroutineType(types: !6)
 !6 = !{}
 !7 = !DILocation(line: 4, column: 10, scope: !8)

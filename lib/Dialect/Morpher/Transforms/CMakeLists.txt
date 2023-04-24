@@ -1,5 +1,6 @@
 add_mlir_dialect_library(MLIRMorpherTransforms
         MarkMapRegion.cpp
+        LegalizeMorpher.cpp
 
         ADDITIONAL_HEADER_DIRS
         ${PROJ_INCLUDE_DIR}/morpher/Dialect/Morpher/Transforms

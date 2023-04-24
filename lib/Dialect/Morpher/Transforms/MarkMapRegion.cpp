@@ -1,16 +1,5 @@
 //===- MarkMapRegion.cpp - Morpher Passes
 //---------------------------------------===//
-//===----------------------------------------------------------------------===//
-//
-// This file implements a series of misc passes that dont modify the MLIR code.
-// These passes include printing operation nesting or generating test vectors
-// in XML targeting bambu simulation.
-//
-// Test vector generation works for algorithms with no dynamic behaviour based
-// on the input data. It supports regular memref call convetion and bareptr call
-// convention.
-//
-//===----------------------------------------------------------------------===//
 
 #include "PassDetail.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"

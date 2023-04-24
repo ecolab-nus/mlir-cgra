@@ -12,6 +12,7 @@ class MorpherDialect;
 }
 namespace func {
 class FuncOp;
+class FuncDialect;
 }
 namespace morpher {
 #define GEN_PASS_CLASSES
