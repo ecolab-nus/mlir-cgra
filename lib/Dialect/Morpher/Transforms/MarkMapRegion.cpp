@@ -14,6 +14,8 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/Support/ToolOutputFile.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/Debug.h"
+#include "llvm/Support/raw_ostream.h"
 
 #define DEBUG_TYPE "mark-map-region"
 
@@ -35,7 +37,8 @@ bool isInnerMostOp(Operation *op) {
 
 /// Find the most inner loop body, i.e., region does not contain other for
 /// loops.
-void findInnerBody(Operation* op, llvm::SmallVectorImpl<Operation *> *inner_ops) {
+void findInnerBody(Operation *op,
+                   llvm::SmallVectorImpl<Operation *> *inner_ops) {
   if (isInnerMostOp(op)) {
     inner_ops->push_back(op);
     return;
@@ -56,8 +59,9 @@ void findInnerBody(Operation* op, llvm::SmallVectorImpl<Operation *> *inner_ops)
 
 /// Add MarkMapOp to region.
 void insertMarkMapOp(Operation *op) {
-  llvm::errs() << "insert mark for " << *op << "\n";
-  assert(op->getNumRegions() > 0 && "Should mark operation with at lease one region!");
+  LLVM_DEBUG(llvm::dbgs() << "insert mark for " << *op << "\n");
+  assert(op->getNumRegions() > 0 &&
+         "Should mark operation with at lease one region!");
   OpBuilder builder(op->getContext());
   auto blk = &op->getRegion(0).front();
   builder.setInsertionPointToStart(blk);
@@ -68,6 +72,17 @@ class MarkMapRegion : public mlir::morpher::MarkMapRegionBase<MarkMapRegion> {
 public:
   void runOnOperation() override {
     auto func = this->getOperation();
+
+    // Only process morpher kernel function.
+    if (!func.getOperation()->getAttrOfType<UnitAttr>(
+            MorpherDialect::morpherKernelAttrName())) {
+      LLVM_DEBUG(llvm::dbgs() << "Skip " << func.getName() << " as it is not morpher kernel.";);
+      return;
+    }
+
+    
+    LLVM_DEBUG(llvm::dbgs() << "Mark " << func.getName(););
+    
 
     // Find all inner bodies.
     llvm::SmallVector<Operation *, 4> inner_most_ops;

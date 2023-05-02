@@ -18,7 +18,9 @@ include "mlir/IR/OpBase.td"
 def Morpher_Dialect : Dialect {
   let name = "morpher";
   let cppNamespace = "::mlir::morpher";
-
+  let extraClassDeclaration = [{
+  static llvm::StringRef morpherKernelAttrName() { return "__morpher_kernel__"; }
+  }];
 }
 
 class Morpher_Op<string mnemonic, list<Trait> traits = []> :

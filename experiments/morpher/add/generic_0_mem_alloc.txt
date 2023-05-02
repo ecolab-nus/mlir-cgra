@@ -1,6 +1,0 @@
-var_name,base_addr
-%0,0
-%1,2048
-%2,4
-loopend,2047
-loopstart,4094

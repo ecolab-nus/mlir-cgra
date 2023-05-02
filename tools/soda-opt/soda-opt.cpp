@@ -24,6 +24,7 @@
 
 #include "morpher/Dialect/Morpher/IR/MorpherDialect.h"
 #include "morpher/Dialect/Morpher/Transforms/Passes.h"
+#include "morpher/Dialect/Morpher/TransformOps/MorpherTransformOps.h"
 
 #include "mlir/Dialect/Arithmetic/Transforms/Passes.h"
 #include "mlir/Dialect/Func/Transforms/Passes.h"
@@ -163,6 +164,7 @@ int main(int argc, char **argv) {
 
   // ----- Morpher -----
   mlir::morpher::registerMorpherPasses();
+  mlir::morpher::registerTransformDialectExtension(registry);
 
   // Conversion passes
 

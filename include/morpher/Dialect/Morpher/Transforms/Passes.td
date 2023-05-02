@@ -27,4 +27,14 @@ def LegalizeMorpher : Pass<"legalize-morpher", "::mlir::ModuleOp"> {
   ];
 }
 
+//def OutlineMorpherKernels : Pass<"outline-morpher-kernels", "mlir::ModuleOp">  {
+//  let summary = "Outlining linalg operations to morpher kernels.";
+//  let constructor = "mlir::morpher::createOutlineMorpherKernelPass()";
+//  let dependentDialects = [
+//    "mlir::morpher::MorpherDialect",
+//    "mlir::func::FuncDialect",
+//    "mlir::linalg::LinalgDialect"
+//  ];
+//}
+
 #endif // MLIR_DIALECT_MORPHER_PASSES

@@ -63,6 +63,7 @@ set(LIBS
   # Morpher
   MLIRMorpherOps
   MLIRMorpherTransforms
+  MLIRMorpherTransformOps
 )
 
 set(SOURCES
