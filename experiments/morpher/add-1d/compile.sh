@@ -62,14 +62,14 @@ echo "Executing ${final_bin_file}"
 ./${final_bin_file}
 
 echo "Clean up generated files"
-rm ${mlir_llvm_file}
-rm ${ll_file}
-rm ${opt_ll_file}
-rm ${instr_ll_file}
-rm ${final_ll_file}
-rm ${final_obj_file}
-rm ${final_bin_file}
-rm *.log
-rm *.dot
-rm *.xml
-rm *.txt
+#rm ${mlir_llvm_file}
+#rm ${ll_file}
+#rm ${opt_ll_file}
+#rm ${instr_ll_file}
+#rm ${final_ll_file}
+#rm ${final_obj_file}
+#rm ${final_bin_file}
+#rm *.log
+#rm *.dot
+#rm *.xml
+#rm *.txt
