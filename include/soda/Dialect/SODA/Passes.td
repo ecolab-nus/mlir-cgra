@@ -29,6 +29,8 @@ def SodaKernelGeneration : Pass<"soda-generate-bambu-accelcode", "mlir::ModuleOp
   let options = [
     Option<"noAliasAnalysis", "no-aa", "bool", /*default=*/"false",
            "If set, kernel arguments will not be marked with no-alias (default: false)">,
+    Option<"genMorpherKernel", "gen-morpher-kernel", "bool", "false",
+           "if true, the generated kernel will be marked for morpher">
   ];
 }
 
@@ -39,6 +41,8 @@ def CGRAKernelGeneration : Pass<"generate-cgra-accelcode", "mlir::ModuleOp"> {
   let options = [
     Option<"noAliasAnalysis", "no-aa", "bool", /*default=*/"false",
            "If set, kernel arguments will not be marked with no-alias (default: false)">,
+    Option<"genMorpherKernel", "gen-morpher-kernel", "bool", "false",
+           "if true, the generated kernel will be marked for morpher">
   ];
 }
 
@@ -50,6 +54,10 @@ def SodaHostGeneration : Pass<"soda-generate-bambu-hostcode"> {
 def CGRAHostGeneration : Pass<"generate-cgra-hostcode"> {
   let summary = "Generate host code to call CGRA api";
   let constructor = "mlir::soda::createCGRAHostGenerationPass()";
+  let options = [
+    Option<"genMorpherKernel", "gen-morpher-kernel", "bool", "false",
+           "if true, the generated kernel will be marked for morpher">
+  ];
 }
 
 def SodaAsyncRegionPass : Pass<"soda-async-region", "func::FuncOp"> {

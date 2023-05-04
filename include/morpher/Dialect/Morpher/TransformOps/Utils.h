@@ -2,7 +2,18 @@
 // Created by huiying on 5/3/23.
 //
 
-#ifndef SODA_OPT_UTILS_H
-#define SODA_OPT_UTILS_H
+#ifndef MORPHER_TRANSFORMOPS_UTILS_H
+#define MORPHER_TRANSFORMOPS_UTILS_H
 
-#endif // SODA_OPT_UTILS_H
+#include "mlir/Interfaces/CallInterfaces.h"
+
+namespace mlir {
+namespace morpher {
+
+template<typename FuncType>
+FailureOr<FuncType> outline(ArrayRef<Operation*> ops, StringRef kernel_name);
+
+}
+}
+
+#endif // MORPHER_TRANSFORMOPS_UTILS_H

@@ -23,6 +23,7 @@
 #include "mlir/IR/SymbolTable.h"
 #include "mlir/Support/LLVM.h"
 #include "mlir/Transforms/RegionUtils.h"
+#include "morpher/Dialect/Morpher/IR/MorpherDialect.h"
 
 #include "PassDetail.h"
 #include "soda/Dialect/SODA/Passes.h"
@@ -110,6 +111,7 @@ void SodaKernelGenerationPass::runOnOperation() {
     func::FuncOp dstFunc = replacer.create<func::FuncOp>(
         funcOp.getLoc(), funcOp.getName(), funcOp.getFunctionType());
 
+
     dstFunc.getRegion().takeBody(funcOp.body());
     funcOp.erase();
 
@@ -126,6 +128,12 @@ void SodaKernelGenerationPass::runOnOperation() {
         index++;
       }
     }
+
+    // Add morpher kernel attribute
+    if (this->genMorpherKernel) {
+      dstFunc.getOperation()->setAttr(mlir::morpher::MorpherDialect::morpherKernelAttrName(), UnitAttr::get(&getContext()));
+    }
+
   });
 
   mop.walk([](soda::ReturnOp returnOp) {
@@ -199,6 +207,11 @@ void CGRAKernelGenerationPass::runOnOperation() {
 
     dstFunc.getRegion().takeBody(funcOp.body());
     funcOp.erase();
+
+    // Add morpher kernel attribute
+    if (this->genMorpherKernel) {
+      dstFunc.getOperation()->setAttr(mlir::morpher::MorpherDialect::morpherKernelAttrName(), UnitAttr::get(&getContext()));
+    }
 
     // Set all memref arguments to noalias
     // TODO (NICO): Create analysis on the outliner, only carry decisions here

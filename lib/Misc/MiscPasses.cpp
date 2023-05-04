@@ -13,10 +13,12 @@
 
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/Pass/Pass.h"
+#include "morpher/Dialect/Morpher/IR/MorpherDialect.h"
 #include "soda/Dialect/SODA/SODADialect.h"
 #include "soda/Misc/Passes.h"
 
 #include "mlir/Support/FileUtilities.h"
+#include "llvm/ADT/TypeSwitch.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/Support/ToolOutputFile.h"
 #include "llvm/Support/raw_ostream.h"
@@ -102,40 +104,56 @@ class TestPrintOpNestingPass
 class TestArgumentsToXMLPass
     : public mlir::soda::TestArgumentsToXMLBase<TestArgumentsToXMLPass> {
 
+  template <typename T>
+  void toXml(llvm::StringRef funcName, T op) {
+    // Prepare the output streams
+    std::string errorMessageT;
+    std::string errorMessageI;
+    std::string filenameT = funcName.str() + "_test.xml";
+    std::string filenameI = funcName.str() + "_interface.xml";
+    auto outputT = openOutputFile(filenameT, &errorMessageT);
+    auto outputI = openOutputFile(filenameI, &errorMessageI);
+    outputStreamT = &outputT->os();
+    outputStreamI = &outputI->os();
+
+    if (writeToTerminal) {
+      outputStreamT = &llvm::outs();
+      outputStreamI = &llvm::outs();
+    }
+
+    // Populate the stream with the xml vector
+    resetIndent();
+
+    if (usingBarePtr) {
+      generateTestXMLforBareLaunchFunc(op);
+      generateInterfaceXMLforBareLaunchFunc(funcName, op);
+    } else {
+      generateTestXMLforLaunchFunc(op);
+      generateInterfaceXMLforLaunchFunc(funcName, op);
+    }
+
+    if (!writeToTerminal) {
+      outputT->keep();
+      outputI->keep();
+    }
+  }
+
   void runOnOperation() override {
 
-    getOperation().walk([this](mlir::soda::LaunchFuncOp op) {
-      // Prepare the output streams
-      std::string errorMessageT;
-      std::string errorMessageI;
-      std::string filenameT = op.getKernelName().getValue().str() + "_test.xml";
-      std::string filenameI =
-          op.getKernelName().getValue().str() + "_interface.xml";
-      auto outputT = openOutputFile(filenameT, &errorMessageT);
-      auto outputI = openOutputFile(filenameI, &errorMessageI);
-      outputStreamT = &outputT->os();
-      outputStreamI = &outputI->os();
-
-      if (writeToTerminal) {
-        outputStreamT = &llvm::outs();
-        outputStreamI = &llvm::outs();
-      }
-
-      // Populate the stream with the xml vector
-      resetIndent();
-
-      if (usingBarePtr) {
-        generateTestXMLforBareLaunchFunc(op);
-        generateInterfaceXMLforBareLaunchFunc(op);
-      } else {
-        generateTestXMLforLaunchFunc(op);
-        generateInterfaceXMLforLaunchFunc(op);
-      }
-
-      if (!writeToTerminal) {
-        outputT->keep();
-        outputI->keep();
-      }
+    getOperation().walk([this](mlir::Operation *_op) {
+      llvm::TypeSwitch<Operation *>(_op)
+          .Case<func::CallOp>([&](func::CallOp callOp) {
+            if (_op->hasAttrOfType<UnitAttr>(
+                    morpher::MorpherDialect::morpherKernelAttrName())) {
+              toXml(callOp.getCallee(), callOp);
+            }
+          })
+          .Case<soda::LaunchFuncOp>([this](soda::LaunchFuncOp launchOp) {
+            toXml(launchOp.getKernelName(), launchOp);
+          })
+          .Case<soda::LaunchCGRAOp>([this](soda::LaunchCGRAOp launchOp) {
+            toXml(launchOp.getKernelName(), launchOp);
+          });
     });
 
     // TODO: Handle case for C interface
@@ -153,7 +171,8 @@ class TestArgumentsToXMLPass
   void resetPointerId() { pointerId = 0; }
   int incPointerId() { return pointerId++; }
 
-  void generateTestXMLforLaunchFunc(soda::LaunchFuncOp op) {
+  template <typename T>
+  void generateTestXMLforLaunchFunc(T op) {
     printTestPreamble();
     {
       auto indent = pushIndent();
@@ -183,7 +202,7 @@ class TestArgumentsToXMLPass
           // TODO
           // soda.launch_func should not have anything else but memrefs as args
           // if (a.isa<MemRefType, UnrankedMemRefType>()) {
-          if (MemRefType mr = a.dyn_cast<MemRefType>()) {
+          if (MemRefType mr = a.template dyn_cast<MemRefType>()) {
 
             assert(mr.hasRank() && "expected only ranked shapes");
 
@@ -237,19 +256,19 @@ class TestArgumentsToXMLPass
             }
           }
 
-          if (FloatType value = a.dyn_cast<FloatType>()) {
+          if (FloatType value = a.template dyn_cast<FloatType>()) {
             StringRef v;
             v = "1.0";
             printIndentT() << "P" << incPointerId() << "=\"" << v << "\"\n";
           }
 
-          if (IntegerType value = a.dyn_cast<IntegerType>()) {
+          if (IntegerType value = a.template dyn_cast<IntegerType>()) {
             StringRef v;
             v = "1";
             printIndentT() << "P" << incPointerId() << "=\"" << v << "\"\n";
           }
-          
-          if (IndexType value = a.dyn_cast<IndexType>()) {
+
+          if (IndexType value = a.template dyn_cast<IndexType>()) {
             StringRef v;
             v = "1";
             printIndentT() << "P" << incPointerId() << "=\"" << v << "\"\n";
@@ -261,12 +280,13 @@ class TestArgumentsToXMLPass
     printTestClosure();
   };
 
-  void generateInterfaceXMLforLaunchFunc(soda::LaunchFuncOp op) {
+  template <typename T>
+  void generateInterfaceXMLforLaunchFunc(llvm::StringRef kernelName, T op) {
     printInterfacePreamble();
     {
       auto indent = pushIndent();
       initInterface();
-      printI() << op.getKernelName().getValue().str() << "\">\n";
+      printI() << kernelName.str() << "\">\n";
       {
         auto indent = pushIndent();
 
@@ -275,7 +295,7 @@ class TestArgumentsToXMLPass
           long numElements = 0;
           std::string typeString = "int";
 
-          if (MemRefType mr = a.dyn_cast<MemRefType>()) {
+          if (MemRefType mr = a.template dyn_cast<MemRefType>()) {
 
             assert(mr.hasRank() && "expected only ranked shapes");
             numElements = mr.getNumElements();
@@ -325,9 +345,9 @@ class TestArgumentsToXMLPass
               }
             }
           } else {
-            if (FloatType value = a.dyn_cast<FloatType>())
+            if (FloatType value = a.template dyn_cast<FloatType>())
               typeString = "float";
-            if (IntegerType value = a.dyn_cast<IntegerType>()) {
+            if (IntegerType value = a.template dyn_cast<IntegerType>()) {
               if (a.isInteger(1))
                 typeString = "_Bool";
               if (a.isInteger(8))
@@ -339,7 +359,7 @@ class TestArgumentsToXMLPass
               if (a.isInteger(64))
                 typeString = "unsigned long long";
             }
-            if (IndexType value = a.dyn_cast<IndexType>())
+            if (IndexType value = a.template dyn_cast<IndexType>())
               typeString = "unsigned long long";
             printInterfaceLine(incPointerId(), false, typeString, numElements);
           }
@@ -349,7 +369,8 @@ class TestArgumentsToXMLPass
     }
   };
 
-  void generateTestXMLforBareLaunchFunc(soda::LaunchFuncOp op) {
+  template <typename T>
+  void generateTestXMLforBareLaunchFunc(T op) {
     printTestPreamble();
     {
       auto indent = pushIndent();
@@ -374,7 +395,7 @@ class TestArgumentsToXMLPass
           // of elements to generate the array and we can ignore the other
           // members
 
-          if (MemRefType mr = a.dyn_cast<MemRefType>()) {
+          if (MemRefType mr = a.template dyn_cast<MemRefType>()) {
 
             assert(mr.hasRank() && "expected only ranked shapes");
 
@@ -395,19 +416,19 @@ class TestArgumentsToXMLPass
             printT() << v << "}\"\n";
           }
 
-          if (FloatType value = a.dyn_cast<FloatType>()) {
+          if (FloatType value = a.template dyn_cast<FloatType>()) {
             StringRef v;
             v = "1.0";
             printIndentT() << "P" << incPointerId() << "=\"" << v << "\"\n";
           }
 
-          if (IntegerType value = a.dyn_cast<IntegerType>()) {
+          if (IntegerType value = a.template dyn_cast<IntegerType>()) {
             StringRef v;
             v = "1";
             printIndentT() << "P" << incPointerId() << "=\"" << v << "\"\n";
           }
-          
-          if (IndexType value = a.dyn_cast<IndexType>()) {
+
+          if (IndexType value = a.template dyn_cast<IndexType>()) {
             StringRef v;
             v = "1";
             printIndentT() << "P" << incPointerId() << "=\"" << v << "\"\n";
@@ -419,12 +440,14 @@ class TestArgumentsToXMLPass
     printTestClosure();
   };
 
-  void generateInterfaceXMLforBareLaunchFunc(soda::LaunchFuncOp op) {
+  template <typename T>
+  void generateInterfaceXMLforBareLaunchFunc(llvm::StringRef kernel_name,
+                                             T op) {
     printInterfacePreamble();
     {
       auto indent = pushIndent();
       initInterface();
-      printI() << op.getKernelName().getValue().str() << "\">\n";
+      printI() << kernel_name.str() << "\">\n";
       {
         auto indent = pushIndent();
 
@@ -433,7 +456,7 @@ class TestArgumentsToXMLPass
           long numElements = 0;
           std::string typeString = "int";
 
-          if (MemRefType mr = a.dyn_cast<MemRefType>()) {
+          if (MemRefType mr = a.template dyn_cast<MemRefType>()) {
             assert(mr.hasRank() && "expected only ranked shapes");
             numElements = mr.getNumElements();
 
@@ -452,9 +475,9 @@ class TestArgumentsToXMLPass
 
             printInterfaceLine(incPointerId(), true, typeString, numElements);
           } else {
-            if (FloatType value = a.dyn_cast<FloatType>())
+            if (FloatType value = a.template dyn_cast<FloatType>())
               typeString = "float";
-            if (IntegerType value = a.dyn_cast<IntegerType>()) {
+            if (IntegerType value = a.template dyn_cast<IntegerType>()) {
               if (a.isInteger(1))
                 typeString = "_Bool";
               if (a.isInteger(8))
@@ -466,7 +489,7 @@ class TestArgumentsToXMLPass
               if (a.isInteger(64))
                 typeString = "unsigned long long";
             }
-            if (IndexType value = a.dyn_cast<IndexType>())
+            if (IndexType value = a.template dyn_cast<IndexType>())
               typeString = "unsigned long long";
             printInterfaceLine(incPointerId(), false, typeString, numElements);
           }

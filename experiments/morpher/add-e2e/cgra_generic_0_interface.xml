@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<module>
+ <function id="cgra_generic_0">
+  <arg id="P0" interface_type="array" interface_typename="float*" interface_typename_orig="float (*)" size="256" interface_typename_include=""/>
+  <arg id="P1" interface_type="array" interface_typename="float*" interface_typename_orig="float (*)" size="256" interface_typename_include=""/>
+  <arg id="P2" interface_type="default" interface_typename="unsigned long long" interface_typename_orig="unsigned long long" interface_typename_include=""/>
+  <arg id="P3" interface_type="default" interface_typename="unsigned long long" interface_typename_orig="unsigned long long" interface_typename_include=""/>
+  <arg id="P4" interface_type="default" interface_typename="unsigned long long" interface_typename_orig="unsigned long long" interface_typename_include=""/>
+  <arg id="P5" interface_type="array" interface_typename="float*" interface_typename_orig="float (*)" size="256" interface_typename_include=""/>
+  <arg id="P6" interface_type="array" interface_typename="float*" interface_typename_orig="float (*)" size="256" interface_typename_include=""/>
+  <arg id="P7" interface_type="default" interface_typename="unsigned long long" interface_typename_orig="unsigned long long" interface_typename_include=""/>
+  <arg id="P8" interface_type="default" interface_typename="unsigned long long" interface_typename_orig="unsigned long long" interface_typename_include=""/>
+  <arg id="P9" interface_type="default" interface_typename="unsigned long long" interface_typename_orig="unsigned long long" interface_typename_include=""/>
+  <arg id="P10" interface_type="array" interface_typename="float*" interface_typename_orig="float (*)" size="256" interface_typename_include=""/>
+  <arg id="P11" interface_type="array" interface_typename="float*" interface_typename_orig="float (*)" size="256" interface_typename_include=""/>
+  <arg id="P12" interface_type="default" interface_typename="unsigned long long" interface_typename_orig="unsigned long long" interface_typename_include=""/>
+  <arg id="P13" interface_type="default" interface_typename="unsigned long long" interface_typename_orig="unsigned long long" interface_typename_include=""/>
+  <arg id="P14" interface_type="default" interface_typename="unsigned long long" interface_typename_orig="unsigned long long" interface_typename_include=""/>
+ </function>
+</module>

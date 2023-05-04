@@ -1,4 +1,5 @@
 #include "morpher/Dialect/Morpher/TransformOps/MorpherTransformOps.h"
+#include "morpher/Dialect/Morpher/TransformOps/Utils.h"
 
 #include "mlir/AsmParser/AsmParser.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
@@ -12,7 +13,6 @@
 #include "mlir/Interfaces/TilingInterface.h"
 #include "mlir/Parser/Parser.h"
 #include "mlir/Transforms/GreedyPatternRewriteDriver.h"
-#include "llvm/ADT/StringSet.h"
 
 using namespace mlir;
 using namespace mlir::linalg;
@@ -29,6 +29,20 @@ public:
 ::mlir::DiagnosedSilenceableFailure mlir::transform::OutlineMorpherKernel::apply(
     ::mlir::transform::TransformResults &transformResults,
     ::mlir::transform::TransformState &state) {
+
+  SmallVector<Operation*> target_ops;
+
+  for (auto target : getTargets()) {
+    // Collect all matched operations.
+    auto payloads = state.getPayloadOps(target);
+    target_ops.append(payloads.begin(), payloads.end());
+  }
+
+  // No operation to be outlined.
+  if (target_ops.empty())
+    return mlir::DiagnosedSilenceableFailure::success();
+
+  // Outline operations to a new function.
 
 
   return mlir::DiagnosedSilenceableFailure::definiteFailure();

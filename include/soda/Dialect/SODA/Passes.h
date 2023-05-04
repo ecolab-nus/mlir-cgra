@@ -44,7 +44,7 @@ void populateHostGenerationConversionPatterns(RewritePatternSet &patterns);
 std::unique_ptr<Pass> createSodaHostGenerationPass();
 
 /// Transform `soda.launch_cgra` into calls to the CGRA API.
-void populateCGRAHostGenerationConversionPatterns(RewritePatternSet &patterns);
+void populateCGRAHostGenerationConversionPatterns(RewritePatternSet &patterns, bool morpher_kernel);
 std::unique_ptr<Pass> createCGRAHostGenerationPass();
 
 /// Rewrites a function region so that SODA ops execute async.

@@ -31,15 +31,19 @@ func::FuncOp replaceMapMeFunc(ModuleOp moduleOp) {
       func::FuncOp::create(moduleOp.getLoc(), MapHintOp::mapHintFuncName(),
                            FunctionType::get(moduleOp.getContext(), {}, {}));
   func.setSymVisibilityAttr(StringAttr::get(moduleOp.getContext(), "private"));
-  moduleOp.push_back(func);
 
   OpBuilder builder(moduleOp.getContext());
-  moduleOp.walk([func, &builder](MapHintOp op)  {
+  bool has_map_hint = false;
+  moduleOp.walk([func, &builder, &has_map_hint](MapHintOp op)  {
     builder.setInsertionPoint(op.getOperation());
     builder.create<func::CallOp>(op.getLoc(), func, op->getOperands());
+    has_map_hint = true;
     op->erase();
   });
 
+  if (has_map_hint) {
+    moduleOp.push_back(func);
+  }
   return func;
 }
 

@@ -10,6 +10,7 @@
 
 #include "mlir/Conversion/LLVMCommon/Pattern.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "morpher/Dialect/Morpher/IR/MorpherDialect.h"
 #include "mlir/IR/BuiltinDialect.h"
 #include "mlir/IR/ImplicitLocOpBuilder.h"
 
@@ -53,7 +54,7 @@ public:
   void runOnOperation() override {
 
     RewritePatternSet patterns(&getContext());
-    soda::populateCGRAHostGenerationConversionPatterns(patterns);
+    soda::populateCGRAHostGenerationConversionPatterns(patterns, this->genMorpherKernel);
     ConversionTarget target(getContext());
     target.addLegalDialect<func::FuncDialect, BuiltinDialect>();
     if (failed(applyPartialConversion(getOperation(), target,
@@ -112,6 +113,11 @@ public:
 class SODALaunchCGRALowering : public OpRewritePattern<soda::LaunchCGRAOp> {
 public:
   using OpRewritePattern<soda::LaunchCGRAOp>::OpRewritePattern;
+  bool morpherKernel;
+
+  SODALaunchCGRALowering(MLIRContext *context, bool morpherK)
+      : morpherKernel(morpherK), OpRewritePattern<soda::LaunchCGRAOp>(context) {
+  }
 
   LogicalResult matchAndRewrite(soda::LaunchCGRAOp op,
                                 PatternRewriter &rewriter) const override {
@@ -128,28 +134,32 @@ public:
       func = module.lookupSymbol<func::FuncOp>(newName);
     }
 
-      // Get callee
-      Operation *kernelFunc = module.lookupSymbol(op.kernelAttr());
-      auto kernelSODAFunction = dyn_cast_or_null<soda::SODAFuncOp>(kernelFunc);
+    // Get callee
+    Operation *kernelFunc = module.lookupSymbol(op.kernelAttr());
+    auto kernelSODAFunction = dyn_cast_or_null<soda::SODAFuncOp>(kernelFunc);
 
-      // Add a private function with same prototype on the top of parent module
-      OpBuilder::InsertionGuard guard(rewriter);
-      rewriter.setInsertionPointToStart(module.getBody());
-      if (kernelSODAFunction == NULL)
-        std::cout<<"kernelSODAFunction is NULL"<<std::endl;
-      FunctionType funcTy = kernelSODAFunction.getFunctionType();
-      func::FuncOp updatedFunc = rewriter.create<func::FuncOp>(
-          rewriter.getUnknownLoc(), newName, funcTy);
-      updatedFunc.setPrivate();
+    // Add a private function with same prototype on the top of parent module
+    OpBuilder::InsertionGuard guard(rewriter);
+    rewriter.setInsertionPointToStart(module.getBody());
+    if (kernelSODAFunction == NULL)
+      std::cout << "kernelSODAFunction is NULL" << std::endl;
+    FunctionType funcTy = kernelSODAFunction.getFunctionType();
+    func::FuncOp updatedFunc = rewriter.create<func::FuncOp>(
+        rewriter.getUnknownLoc(), newName, funcTy);
+    updatedFunc.setPrivate();
 
-      rewriter.setInsertionPoint(op);
+    rewriter.setInsertionPoint(op);
     // }
 
     assert(
         isa<FunctionOpInterface>(SymbolTable::lookupSymbolIn(module, newName)));
 
-    rewriter.replaceOpWithNewOp<func::CallOp>(op, TypeRange{}, newName,
+    auto callOp = rewriter.replaceOpWithNewOp<func::CallOp>(op, TypeRange{}, newName,
                                               op.getOperands());
+
+    if (morpherKernel) {
+      callOp->setAttr(morpher::MorpherDialect::morpherKernelAttrName(), rewriter.getUnitAttr());
+    }
 
     return success();
   }
@@ -179,12 +189,10 @@ void soda::populateHostGenerationConversionPatterns(
 }
 
 void soda::populateCGRAHostGenerationConversionPatterns(
-    RewritePatternSet &patterns) {
+    RewritePatternSet &patterns, bool morpherKernel) {
   // clang-format off
-  patterns.add<
-      SODALaunchCGRALowering,
-      SODAModuleDeletion
-      >(patterns.getContext());
+  patterns.add<SODAModuleDeletion>(patterns.getContext());
+  patterns.add<SODALaunchCGRALowering>(patterns.getContext(), morpherKernel);
   // clang-format on
 }
 
