@@ -7,8 +7,8 @@ get_property(conversion_libs GLOBAL PROPERTY MLIR_CONVERSION_LIBS)
 # message(PUBLIC "${conversion_libs}")
 
 set(LIBS
-  # ${dialect_libs}
-  # ${conversion_libs}
+  ${dialect_libs}
+  ${conversion_libs}
 
   # Core
   MLIRIR

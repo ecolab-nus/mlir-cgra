@@ -1,0 +1,102 @@
+#+title: Run
+
+
+* Original file
+
+#+begin_src bash :results output
+
+cat 01-linalg.mlir
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+#map1 = affine_map<(d0, d1, d2, d3) -> (d0, d1, d2, d3)>
+#map2 = affine_map<(d0, d1, d2, d3) -> (d3)>
+
+func.func @cgra_kernel(%arg0 : tensor<1x49x40x1xf32>) -> tensor<1x25x20x8xf32> {
+    %w = arith.constant dense<1.> : tensor<8x10x8x1xf32>
+    %b = arith.constant dense<1.> : tensor<8xf32>
+
+    %conv_out = linalg.init_tensor [1, 25, 20, 8] : tensor<1x25x20x8xf32>
+
+    // compute conv
+    %conv = linalg.conv_2d_nhwc_fhwc ins(%arg0, %w : tensor<1x49x40x1xf32>, tensor<8x10x8x1xf32>) outs(%conv_out : tensor<1x25x20x8xf32>) -> tensor<1x25x20x8xf32>
+
+    // add bias
+    %conv_bias_out = linalg.init_tensor [1, 25, 20, 8] : tensor<1x25x20x8xf32>
+    %add_out = linalg.generic {indexing_maps = [#map1, #map2, #map1], iterator_types = ["parallel", "parallel", "parallel", "parallel"]} ins(%conv, %b : tensor<1x25x20x8xf32>, tensor<8xf32>) outs(%conv_bias_out : tensor<1x25x20x8xf32>) {
+    ^bb0(%arg4: f32, %arg5: f32, %arg6: f32):
+      %16 = arith.addf %arg4, %arg5 : f32
+      linalg.yield %16 : f32
+    } -> tensor<1x25x20x8xf32>
+
+    return %add_out :  tensor<1x25x20x8xf32>
+}
+transform.with_pdl_patterns {
+  ^bb0(%arg0: !pdl.operation):
+    sequence %arg0 failures(propagate) {
+      ^bb0(%arg1: !pdl.operation):
+        // tile and fuse conv and addf
+        %3 = transform.structured.match ops{["linalg.generic"]} in %arg1
+        %1, %loops:2 = transform.structured.fuse %3 {tile_sizes = [0, 8, 8, 0]}
+    }
+}
+#+end_example
+* Tiling
+
+#+begin_src bash :results output
+~/llvm-project-16/debug/bin/mlir-opt --test-transform-dialect-interpreter --canonicalize 01-linalg.mlir | tee 02-bufferized.mlir
+#+end_src
+
+#+RESULTS:
+#+begin_example
+#map0 = affine_map<(d0) -> (-d0 + 25, 8)>
+#map1 = affine_map<(d0) -> (-d0 + 20, 8)>
+#map2 = affine_map<(d0, d1) -> (-d0 + 34, d1 + 9)>
+#map3 = affine_map<(d0, d1) -> (-d0 + 27, d1 + 7)>
+#map4 = affine_map<(d0, d1, d2, d3) -> (d0, d1, d2, d3)>
+#map5 = affine_map<(d0, d1, d2, d3) -> (d3)>
+module {
+  func.func @cgra_kernel(%arg0: tensor<1x49x40x1xf32>) -> tensor<1x25x20x8xf32> {
+    %c20 = arith.constant 20 : index
+    %c25 = arith.constant 25 : index
+    %c0 = arith.constant 0 : index
+    %c8 = arith.constant 8 : index
+    %cst = arith.constant dense<1.000000e+00> : tensor<8x10x8x1xf32>
+    %cst_0 = arith.constant dense<1.000000e+00> : tensor<8xf32>
+    %0 = linalg.init_tensor [1, 25, 20, 8] : tensor<1x25x20x8xf32>
+    %1 = scf.for %arg1 = %c0 to %c25 step %c8 iter_args(%arg2 = %0) -> (tensor<1x25x20x8xf32>) {
+      %2 = scf.for %arg3 = %c0 to %c20 step %c8 iter_args(%arg4 = %arg2) -> (tensor<1x25x20x8xf32>) {
+        %3 = affine.min #map0(%arg1)
+        %4 = affine.min #map1(%arg3)
+        %5 = affine.min #map0(%arg1)
+        %6 = affine.min #map1(%arg3)
+        %7 = affine.min #map2(%arg1, %3)
+        %8 = affine.min #map3(%arg3, %4)
+        %9 = affine.min #map0(%arg1)
+        %10 = affine.min #map1(%arg3)
+        %11 = tensor.extract_slice %arg0[0, %arg1, %arg3, 0] [1, %7, %8, 1] [1, 1, 1, 1] : tensor<1x49x40x1xf32> to tensor<1x?x?x1xf32>
+        %12 = linalg.init_tensor [1, %9, %10, 8] : tensor<1x?x?x8xf32>
+        %13 = linalg.conv_2d_nhwc_fhwc ins(%11, %cst : tensor<1x?x?x1xf32>, tensor<8x10x8x1xf32>) outs(%12 : tensor<1x?x?x8xf32>) -> tensor<1x?x?x8xf32>
+        %14 = tensor.extract_slice %arg4[0, %arg1, %arg3, 0] [1, %5, %6, 8] [1, 1, 1, 1] : tensor<1x25x20x8xf32> to tensor<1x?x?x8xf32>
+        %15 = linalg.generic {indexing_maps = [#map4, #map5, #map4], iterator_types = ["parallel", "parallel", "parallel", "parallel"]} ins(%13, %cst_0 : tensor<1x?x?x8xf32>, tensor<8xf32>) outs(%14 : tensor<1x?x?x8xf32>) {
+        ^bb0(%arg5: f32, %arg6: f32, %arg7: f32):
+          %17 = arith.addf %arg5, %arg6 : f32
+          linalg.yield %17 : f32
+        } -> tensor<1x?x?x8xf32>
+        %16 = tensor.insert_slice %15 into %arg4[0, %arg1, %arg3, 0] [1, %5, %6, 8] [1, 1, 1, 1] : tensor<1x?x?x8xf32> into tensor<1x25x20x8xf32>
+        scf.yield %16 : tensor<1x25x20x8xf32>
+      }
+      scf.yield %2 : tensor<1x25x20x8xf32>
+    }
+    return %1 : tensor<1x25x20x8xf32>
+  }
+}
+#+end_example
+
+* Bufferize
+* Promote
+* Convert to loops
+
+

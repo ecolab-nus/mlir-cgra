@@ -1,0 +1,22 @@
+* Inbox
+
+** Extact meta data
+
+[[file:/sshx:cpu-server:/home/huiying/llvm-project-fusion/mlir/test/Dialect/MemRef/expand-strided-metadata.mlir::%subview = memref.subview %base\[3, 4, 2\]\[1, 6, 3\]\[1, 1, 1\] :][Extract stride meta data from memref]]
+
+This is only supported in newer llvm, should use this to deal with the parameter problem.
+
+** [2023-04-27 Thu 18:24] If not using bare-ptr config, ConvertFuncToLLVM pass will do the function arguments conversion
+
+[[file:/sshx:cpu-server:/home/huiying/mlir-cgra/experiments/morpher/add/with_s0_no_bare_ptr_log.mlir::module attributes {llvm.data_layout = "", llvm.target_triple = "x86_64-unknown-linux-gnu", soda.container_module} {]]
+** [2023-04-27 Thu 16:56] Convert function argument to llvm.ptr
+
+[[file:/sshx:cpu-server:/home/huiying/mlir-cgra/experiments/morpher/add/no_s0_log.mlir::// -----// IR Dump After ConvertFuncToLLVM (convert-func-to-llvm) //----- //]]
+** [2023-04-16 Sun 16:36] lower to mlir use bare ptr
+
+ ./build/bin/soda-opt -lower-all-to-llvm="use-bare-ptr-memref-call-conv" --mlir-print-ir-after-all experiments/demo/add/08-accel.mlir
+
+
+ 1. When there is no s0, the func arguments are converted to llvm.ptr already. But with s0, the pass ConvertFuncToLLVM doesn't work like that.
+
+    Check ConvertFuncToLLVM pass to see why

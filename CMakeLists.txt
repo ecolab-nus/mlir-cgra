@@ -6,6 +6,27 @@ set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
 set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ standard to conform to")
 
 find_package(MLIR REQUIRED CONFIG)
+#
+#include(ExternalProject)
+#set(EASYLOGGINGCPP_URL "https://github.com/abumq/easyloggingpp/archive/refs/tags/v9.97.0.zip")
+#set(EASYLOGGINGCPP_NAME easyloggingcpp)
+#set(EASYLOGGINGCPP_SRC ${CMAKE_CURRENT_SOURCE_DIR}/easyloggingcpp/src)
+#set(EASYLOGGINGCPP_DOWNLOAD ${CMAKE_CURRENT_SOURCE_DIR}/easyloggingcpp/download)
+#set(EASYLOGGINGCPP_BINARY ${CMAKE_CURRENT_SOURCE_DIR}/easyloggingcpp/build)
+#set(EASYLOGGINGCPP_INSTALL ${CMAKE_CURRENT_SOURCE_DIR}/easyloggingcpp/install)
+#set(EASYLOGGINGCPP_BUILD_COMMAND cd ${EASYLOGGINGCPP_SRC} &&  )
+#
+#EXTERNALPROJECT_ADD(${EASYLOGGINGCPP_NAME}
+#        URL ${EASYLOGGINGCPP_URL}
+#        PREFIX ${CMAKE_CURRENT_BINARY_DIR}/${EASYLOGGINGCPP_NAME}
+#        DOWNLOAD_DIR ${EASYLOGGINGCPP_DOWNLOAD}
+#        SOURCE_DIR  ${EASYLOGGINGCPP_SRC}
+#        BINARY_DIR  ${EASYLOGGINGCPP_BINARY}
+#        INSTALL_DIR ${EASYLOGGINGCPP_INSTALL}
+#        BUILD_COMMAND
+#        )
+#
+#include_directories(${CMAKE_CURRENT_BINARY_DIR}/${EASYLOGGINGCPP_NAME}/src/${EASYLOGGINGCPP_NAME})
 
 message(STATUS "Using MLIRConfig.cmake in: ${MLIR_DIR}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
@@ -49,3 +70,4 @@ add_subdirectory(test)
 add_subdirectory(tools)
 
 add_subdirectory(llvm_plugins/lib)
+

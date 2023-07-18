@@ -9,11 +9,15 @@
 namespace mlir {
 namespace morpher {
 class MorpherDialect;
-}
+} // namespace morpher
 namespace func {
 class FuncOp;
 class FuncDialect;
-}
+} // namespace func
+namespace transform {
+class TransformDialect;
+} // namespace transform
+
 namespace morpher {
 #define GEN_PASS_CLASSES
 #include "morpher/Dialect/Morpher/Transforms/Passes.h.inc"

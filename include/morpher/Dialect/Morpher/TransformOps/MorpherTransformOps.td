@@ -19,4 +19,23 @@ def OutlineMorpherKernel  : Op<Transform_Dialect, "morpher.outline",
   let assemblyFormat = "$targets attr-dict";
 }
 
+def RunPassPipeline : Op<Transform_Dialect, "morpher.run_passpipeline",
+                        [DeclareOpInterfaceMethods<TransformOpInterface>,
+                                DeclareOpInterfaceMethods<MemoryEffectsOpInterface>]> {
+  let summary = "Run passpipeline by parse the commandline string.";
+  let arguments = (ins StrAttr:$pass_pipeline,
+                       DefaultValuedStrAttr<StrAttr, "::mlir::ModuleOp::getOpName()">:$op_name,
+                     Optional<PDL_Operation>:$container_op);
+  let assemblyFormat = [{
+    $container_op `(` $pass_pipeline `)` attr-dict
+  }];
+}
+
+def Print : Op<Transform_Dialect, "morpher.print", [DeclareOpInterfaceMethods<TransformOpInterface>, 
+                                                    DeclareOpInterfaceMethods<MemoryEffectsOpInterface>]> {
+  let summary = "Print the given operation";
+  let arguments = (ins Optional<PDL_Operation>:$target, OptionalAttr<StrAttr>:$comment);
+  let assemblyFormat = "$target attr-dict";
+}
+
 #endif // MORPHER_TRANSFORM_OPS

@@ -97,7 +97,6 @@ public:
 
 } // namespace
 
-std::unique_ptr<OperationPass<mlir::func::FuncOp>>
-mlir::morpher::createMarkMapRegionPass() {
+std::unique_ptr<Pass> mlir::morpher::createMarkMapRegionPass() {
   return std::make_unique<MarkMapRegion>();
 }

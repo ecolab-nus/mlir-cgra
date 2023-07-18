@@ -98,16 +98,18 @@ int main(int argc, char **argv) {
   // need to register dialects that will be *parsed* by the tool, not the one
   // generated
   // clang-format off
-  registry.insert<mlir::func::FuncDialect,
-                  mlir::memref::MemRefDialect,
-                  mlir::LLVM::LLVMDialect,
-                  mlir::linalg::LinalgDialect,
-                  mlir::math::MathDialect,
-                  mlir::scf::SCFDialect,
-                  mlir::cf::ControlFlowDialect,
-                  mlir::vector::VectorDialect,
-                  mlir::arith::ArithmeticDialect,
-                  mlir::AffineDialect>();
+  registerAllDialects(registry);
+//  registry.insert<mlir::func::FuncDialect,
+//                  mlir::memref::MemRefDialect,
+//                  mlir::LLVM::LLVMDialect,
+//                  mlir::linalg::LinalgDialect,
+//                  mlir::math::MathDialect,
+//                  mlir::scf::SCFDialect,
+//                  mlir::cf::ControlFlowDialect,
+//                  mlir::vector::VectorDialect,
+//                  mlir::arith::ArithmeticDialect,
+//                  mlir::AffineDialect,
+//                  mlir::transform::TransformDialect>();
   // clang-format on
   // mlir::registerAllDialects(registry);
 
@@ -165,8 +167,7 @@ int main(int argc, char **argv) {
   // ----- Morpher -----
   mlir::morpher::registerMorpherPasses();
   mlir::morpher::registerTransformDialectExtension(registry);
-
-  // Conversion passes
+  mlir::linalg::registerTransformDialectExtension(registry);
 
   // ----- SNN -----
   mlir::snn::registerSNNPrintPass();

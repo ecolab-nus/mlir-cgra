@@ -27,6 +27,32 @@ def LegalizeMorpher : Pass<"legalize-morpher", "::mlir::ModuleOp"> {
   ];
 }
 
+def DynamicPassPipeline : Pass<"dynamic-pass-pipeline", ""> {
+  let summary = "Run dynamic pass pipeline";
+  let constructor = "mlir::morpher::createDynamicPassPipelinePass()";
+  let dependentDialects = [
+    "mlir::morpher::MorpherDialect",
+    "mlir::func::FuncDialect"
+  ];
+  let options = [
+    Option<"opName", "op-name", "std::string", "\"builtin.module\"", "The operation to apply this pipeline">,
+    Option<"pipeline", "pipeline", "std::string", "", "The pipeline parameters">,
+  ];
+}
+
+def TransformDialectInterp : Pass<"transform-ops-interp", "::mlir::ModuleOp"> {
+  let summary = "Interpret transform ops";
+  let constructor = "mlir::morpher::createTransformDialectInterpPass()";
+  let dependentDialects = [
+    "mlir::func::FuncDialect",
+    "mlir::transform::TransformDialect",
+  ];
+  let options = [
+    Option<"transformFile", "transform-file", "std::string", "\"\"", "The file holding transform module">,
+    Option<"enableExpensiveChecks", "enable-expensive-checks", "bool", "false", "If enable expensive checks">,
+  ];
+}
+
 //def OutlineMorpherKernels : Pass<"outline-morpher-kernels", "mlir::ModuleOp">  {
 //  let summary = "Outlining linalg operations to morpher kernels.";
 //  let constructor = "mlir::morpher::createOutlineMorpherKernelPass()";

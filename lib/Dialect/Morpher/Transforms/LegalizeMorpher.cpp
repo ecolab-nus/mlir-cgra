@@ -61,7 +61,6 @@ public:
 
 } // namespace
 
-std::unique_ptr<OperationPass<ModuleOp>>
-mlir::morpher::createLegalizeMorpherPass() {
+std::unique_ptr<Pass> mlir::morpher::createLegalizeMorpherPass() {
   return std::make_unique<LegalizeMorpher>();
 }

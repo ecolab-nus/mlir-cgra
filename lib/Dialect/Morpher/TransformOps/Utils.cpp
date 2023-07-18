@@ -3,22 +3,71 @@
 //
 #include "morpher/Dialect/Morpher/TransformOps/Utils.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/IR/BlockAndValueMapping.h"
+#include "llvm/ADT/SmallPtrSet.h"
 
 using namespace mlir;
 using namespace mlir::func;
 
 /// outline operations in ops to the end of region.
-// LogicalResult outlineToRegion(ArrayRef<Operation*> ops, Region& region) 
+LogicalResult outlineToRegion(ArrayRef<Operation *> ops,
+                              Region &region,
+                              llvm::SmallPtrSetImpl<Value>* ins,
+                              llvm::SmallPtrSetImpl<Value>* outs) {
+  // check if all ops are in the same block
+  Block* parentBlock = ops.front()->getBlock();
+  if (!llvm::all_of(ops, [&](Operation* _op) {
+        return _op->getBlock() == parentBlock;
+      })) {
+    llvm::errs() << "Error: Can not outline, all ops should be defined in the same block\n";
+    return failure();
+  }
 
-// }
+  ins->clear();
+  outs->clear();
 
-// template <>
-// FailureOr<func::FuncOp> mlir::morpher::outline<func::FuncOp>(ArrayRef<Operation *> ops,
-//                                                   StringRef kernel_name) {
-//     Region region;
-//     if (failed(outlineToRegion(ops, region))) {
-//         return failure();
-//     }
+  BlockAndValueMapping mapping;
+  Block* new_block = new Block();
+  OpBuilder builder(new_block, new_block->begin());
+  region.push_back(new_block);
 
-//     FuncOp func = FuncOp::create(kernel_name);
-// }
+  for (Operation* op : ops) {
+    builder.clone(*op, mapping);
+  }
+
+  // Collect the input values
+  for (auto &op : *new_block) {
+    // Return if used by operations outside this block.
+    for (auto result : op.getResults()) {
+      if (result.isUsedOutsideOfBlock(new_block)) {
+        outs->insert(result);
+      }
+    }
+
+    // Input if defined by operations outside this block.
+    for (auto opr : op.getOperands()) {
+      if (opr.getDefiningOp()->getBlock()!=new_block) {
+        ins->insert(opr);
+      }
+    }
+  }
+
+  return success();
+}
+
+template <>
+FailureOr<func::FuncOp> mlir::morpher::outline<func::FuncOp>(
+    ArrayRef<Operation *> ops,
+    StringRef kernelName,
+    std::function<void(mlir::OpBuilder &, llvm::ArrayRef<Value>)>
+        buildLaunchOp) {
+
+  Region region;
+  SmallPtrSet<Value, 16> ints, outs;
+  if (failed(outlineToRegion(ops, region, &ints, &outs))) {
+    return failure();
+  }
+
+  OpBuilder builder(ops.front()->getContext());
+
+}
