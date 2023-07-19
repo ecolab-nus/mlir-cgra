@@ -64,7 +64,8 @@ set(LIBS
   MLIRMorpherOps
   MLIRMorpherTransforms
   MLIRMorpherTransformOps
-)
+
+  libeasyloggingpp)
 
 set(SOURCES
   soda-opt.cpp

@@ -1,30 +1,15 @@
 cmake_minimum_required(VERSION 3.13.4)
 project(soda-opt LANGUAGES CXX C)
 
+set(BUILD_DIR "/home/huiying/llvm-project-16/debug")
+set(LLVM_EXTERN_LIT ${BUILD_DIR}/bin/llvm-lit)
+set(MLIR_DIR ${BUILD_DIR}/lib/cmake/mlir)
+
 set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
 
 set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ standard to conform to")
 
 find_package(MLIR REQUIRED CONFIG)
-#
-#include(ExternalProject)
-#set(EASYLOGGINGCPP_URL "https://github.com/abumq/easyloggingpp/archive/refs/tags/v9.97.0.zip")
-#set(EASYLOGGINGCPP_NAME easyloggingcpp)
-#set(EASYLOGGINGCPP_SRC ${CMAKE_CURRENT_SOURCE_DIR}/easyloggingcpp/src)
-#set(EASYLOGGINGCPP_DOWNLOAD ${CMAKE_CURRENT_SOURCE_DIR}/easyloggingcpp/download)
-#set(EASYLOGGINGCPP_BINARY ${CMAKE_CURRENT_SOURCE_DIR}/easyloggingcpp/build)
-#set(EASYLOGGINGCPP_INSTALL ${CMAKE_CURRENT_SOURCE_DIR}/easyloggingcpp/install)
-#set(EASYLOGGINGCPP_BUILD_COMMAND cd ${EASYLOGGINGCPP_SRC} &&  )
-#
-#EXTERNALPROJECT_ADD(${EASYLOGGINGCPP_NAME}
-#        URL ${EASYLOGGINGCPP_URL}
-#        PREFIX ${CMAKE_CURRENT_BINARY_DIR}/${EASYLOGGINGCPP_NAME}
-#        DOWNLOAD_DIR ${EASYLOGGINGCPP_DOWNLOAD}
-#        SOURCE_DIR  ${EASYLOGGINGCPP_SRC}
-#        BINARY_DIR  ${EASYLOGGINGCPP_BINARY}
-#        INSTALL_DIR ${EASYLOGGINGCPP_INSTALL}
-#        BUILD_COMMAND
-#        )
 #
 #include_directories(${CMAKE_CURRENT_BINARY_DIR}/${EASYLOGGINGCPP_NAME}/src/${EASYLOGGINGCPP_NAME})
 
@@ -43,6 +28,11 @@ include(AddLLVM)
 include(AddMLIR)
 include(HandleLLVMOptions)
 include(MLIRDetectPythonEnv)
+include(cmake/easyloggingpp.cmake)
+
+include_directories(${CMAKE_BINARY_DIR}/easyloggingpp)
+add_library(libeasyloggingpp STATIC
+        ${CMAKE_BINARY_DIR}/easyloggingpp/src/easylogging++.cc)
 
 if(MLIR_ENABLE_BINDINGS_PYTHON)
   include(MLIRDetectPythonEnv)
@@ -53,6 +43,11 @@ include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${MLIR_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_BINARY_DIR}/include)
+#include_directories(${PROJECT_SOURCE_DIR}/3rdparty/easyloggingpp)
+#add_library(easyloggingpp
+#        ${PROJECT_SOURCE_DIR}/3rdparty/easyloggingpp/src/easylogging++.cc
+#        ${PROJECT_SOURCE_DIR}/3rdparty/easyloggingpp/src/easylogging++.h)
+
 link_directories(${LLVM_BUILD_LIBRARY_DIR})
 add_definitions(${LLVM_DEFINITIONS})
 

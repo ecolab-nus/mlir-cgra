@@ -11,8 +11,9 @@ namespace mlir {
 namespace morpher {
 
 template<typename FuncType>
-FailureOr<FuncType> outline(ArrayRef<Operation*> ops, StringRef kernel_name);
-
+FailureOr<FuncType> outline(ArrayRef<Operation*> ops, StringRef kernel_name,
+std::function<void(mlir::OpBuilder &, llvm::ArrayRef<Value>)>
+    buildLaunchOp);
 }
 }
 

@@ -14,6 +14,7 @@
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/Location.h"
+#include "src/easylogging++.h"
 
 #define DEBUG_TYPE "linalg-to-cgra"
 
@@ -195,9 +196,23 @@ static LogicalResult convertLinalgConvToCGRALaunch(linalg::Conv2DOp op) {
   return success();
 }
 
+
 LogicalResult mlir::convertLinalgConvToCGRALaunch(linalg::Conv2DOp op) {
   return ::convertLinalgConvToCGRALaunch(op);
 }
+
+static LogicalResult convertLinalgConvToCGRALaunch(linalg::Conv2DNhwcFhwcOp op) {
+
+  LinalgToCGRAConverter converter;
+  converter.createLaunch(op);
+
+  return success();
+}
+
+LogicalResult mlir::convertLinalgConvToCGRALaunch(linalg::Conv2DNhwcFhwcOp op) {
+  return ::convertLinalgConvToCGRALaunch(op);
+}
+
 
 static LogicalResult convertLinalgGenericToCGRALaunch(linalg::GenericOp op) {
 

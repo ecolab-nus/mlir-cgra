@@ -1,0 +1,3 @@
+[submodule "3rdparty/easyloggingpp"]
+	path = 3rdparty/easyloggingpp
+	url = git@github.com:abumq/easyloggingpp.git

@@ -29,6 +29,10 @@
 #include "mlir/Dialect/Arithmetic/Transforms/Passes.h"
 #include "mlir/Dialect/Func/Transforms/Passes.h"
 
+#include "src/easylogging++.h"
+
+INITIALIZE_EASYLOGGINGPP
+
 // Defined in the test directory, no public header.
 namespace mlir {
 void registerTestLoopPermutationPass();
@@ -66,6 +70,7 @@ inline void registerAffinePassesForSoda() {
 int main(int argc, char **argv) {
   // mlir::registerAllDialects();
   // mlir::registerAllPasses();
+
   mlir::DialectRegistry registry;
 
   //===--------------------------------------------------------------------===//

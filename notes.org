@@ -20,3 +20,7 @@ This is only supported in newer llvm, should use this to deal with the parameter
  1. When there is no s0, the func arguments are converted to llvm.ptr already. But with s0, the pass ConvertFuncToLLVM doesn't work like that.
 
     Check ConvertFuncToLLVM pass to see why
+
+
+** TODO Checkout affine-loop-coalescing
+https://mlir.llvm.org/docs/Passes/#-affine-loop-coalescing

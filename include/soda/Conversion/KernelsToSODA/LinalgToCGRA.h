@@ -13,6 +13,7 @@ namespace linalg {
 class MatmulOp;
 class BatchMatmulOp;
 class Conv2DOp;
+class Conv2DNhwcFhwcOp ;
 class GenericOp;
 // TODO: add more ops
 } // namespace linalg
@@ -28,6 +29,8 @@ LogicalResult convertLinalgBatchMatmulToCGRALaunch(linalg::BatchMatmulOp batchMa
 
 /// Convert linalg Conv op into CGRA.
 LogicalResult convertLinalgConvToCGRALaunch(linalg::Conv2DOp convOp);
+
+LogicalResult convertLinalgConvToCGRALaunch(linalg::Conv2DNhwcFhwcOp convOp);
 
 /// Convert linalg Generic op into CGRA.
 LogicalResult convertLinalgGenericToCGRALaunch(linalg::GenericOp genericOp);

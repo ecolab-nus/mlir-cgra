@@ -109,12 +109,19 @@ struct LinalgConvMapper: public ConvertLinalgConvToCGRABase<LinalgConvMapper> {
   LinalgConvMapper() = default;
 
   void runOnOperation() override {
-    for (Operation &op : llvm::make_early_inc_range(getOperation().getOps())) {
-      if (auto convOp = dyn_cast<linalg::Conv2DOp>(&op)) {
-        if (failed(convertLinalgConvToCGRALaunch(convOp)))
-          signalPassFailure();
-      }
-    }
+    getOperation().walk([](linalg::Conv2DOp op) {
+      if (failed(convertLinalgConvToCGRALaunch(op)))
+        return WalkResult::interrupt();
+      else
+        return WalkResult::advance();
+    });
+
+    getOperation().walk([](linalg::Conv2DNhwcFhwcOp op) {
+      if (failed(convertLinalgConvToCGRALaunch(op)))
+        return WalkResult::interrupt();
+      else
+        return WalkResult::advance();
+    });
   }
 };
 
