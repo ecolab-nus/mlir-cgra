@@ -32,6 +32,18 @@ soda-opt -lower-all-to-llvm='use-bare-ptr-memref-call-conv=1' 08-accel.mlir > 10
 
 mlir-translate --mlir-to-llvmir 10-accel-llvm.mlir > 12-accel.ll
 
+function morpher_mapper() {
+    local MORPHER_MAPPER_PATH=~/Morpher/Morpher_CGRA_Mapper/
+    local json_arch=${MORPHER_MAPPER_PATH}/json_arch/hycube_original_updatemem.json
+    local update_mem_alloc_python=${MORPHER_MAPPER_PATH}/update_mem_alloc.py
+
+    local mem_alloc_txt_file=$1_mem_alloc.txt
+    python $update_mem_alloc_python $json_arch $mem_alloc_txt_file 2048 2 hycube_original_mem.json
+    echo ">>> Generating binary file for hycube simulator."
+    bash ${MORPHER_MAPPER_PATH}/src/build/cgra_xml_mapper -d $1_PartPredDFG.xml -x 4 -y 4 -j hycube_original_mem.json -i 0 -t HyCUBE_4REG -m 0
+}
+
+#morpher_mapper generic_0
 
 function morpher_dfg_generator() {
     local MORPHER_PATH=~/Morpher/Morpher_DFG_Generator/build/
@@ -51,7 +63,7 @@ function morpher_dfg_generator() {
     opt -gvn -mem2reg -memdep -memcpyopt -lcssa -loop-simplify -licm -loop-deletion -indvars -simplifycfg -mergereturn -indvars -dce ${ll_file} -S -o ${opt_ll_file}
 
     echo "Generating DFG (array_add_PartPredDFG.xml/dot) and data layout (array_add_mem_alloc.txt), generating ${instr_ll_file}"
-    opt -load $MORPHER_PATH/src/LLVMDfggen.so -fn generic_0 -nobanks 2 -banksize 2048 -type PartPred -S -o ${instr_ll_file} --dfggen  -enable-new-pm=0 ${opt_ll_file}
+    opt -load $MORPHER_PATH/src/libdfggenPass.so -fn generic_0 -nobanks 2 -banksize 2048 -type PartPred -S -o ${instr_ll_file} --dfggen  -enable-new-pm=0 ${opt_ll_file}
 
 
     if [ -f instrumentation.ll ]; then

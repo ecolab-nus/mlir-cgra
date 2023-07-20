@@ -240,9 +240,13 @@ void registerSimpleLoweringPass() {
       "optimizations",
       [](OpPassManager &pm, const SimpleOptions &options) {
         pm.addPass(createConvertLinalgToAffineLoopsPass());
+        pm.addPass(createCanonicalizerPass());
+        pm.addPass(createLowerAffinePass());
+        pm.addPass(createCanonicalizerPass());
+        pm.addPass(createLoopCoalescingPass());
+        pm.addPass(createCanonicalizerPass());
         pm.addPass(mlir::morpher::createMarkMapRegionPass());
         pm.addPass(mlir::morpher::createLegalizeMorpherPass());
-        pm.addPass(createLowerAffinePass());
         pm.addPass(createCanonicalizerPass());
         pm.addPass(createCSEPass()); // Only has impact outside linalg ops
         pm.addPass(createConvertSCFToCFPass());

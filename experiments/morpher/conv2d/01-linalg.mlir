@@ -1,5 +1,8 @@
+
 #map1 = affine_map<(d0, d1, d2, d3) -> (d0, d1, d2, d3)>
 #map2 = affine_map<(d0, d1, d2, d3) -> (d3)>
+
+module attributes {llvm.data_layout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128", llvm.target_triple = "i386-unknown-linux-gnu"} {
 
 func.func @cgra_kernel(%arg0 : tensor<1x6x6x1xf32>) -> tensor<1x4x4x8xf32> {
     %w = arith.constant dense<1.> : tensor<8x3x3x1xf32>
@@ -20,4 +23,6 @@ func.func @cgra_kernel(%arg0 : tensor<1x6x6x1xf32>) -> tensor<1x4x4x8xf32> {
 
     return %conv : tensor<1x4x4x8xf32>
     // return %add_out :  tensor<1x25x20x8xf32>
+}
+
 }
