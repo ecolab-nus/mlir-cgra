@@ -21,7 +21,7 @@ soda-opt -soda-extract-arguments-to-xml 07-host.mlir
 soda-opt -outline-cgra-code -generate-cgra-accelcode='gen-morpher-kernel=true' 06-locating.mlir > 08-accel.mlir
 
 
-soda-opt -lower-all-to-llvm='use-bare-ptr-memref-call-conv=1' 08-accel.mlir > 10-accel-llvm.mlir
+soda-opt --mlir-print-ir-after-all -lower-all-to-llvm='use-bare-ptr-memref-call-conv=1' 08-accel.mlir > 10-accel-llvm.mlir
 
 # lower to llvm mlir
 # soda-opt -lower-all-to-llvm='use-bare-ptr-memref-call-conv=1' 07-host.mlir > 09-host-llvm.mlir
@@ -40,10 +40,14 @@ function morpher_mapper() {
     local mem_alloc_txt_file=$1_mem_alloc.txt
     python $update_mem_alloc_python $json_arch $mem_alloc_txt_file 2048 2 hycube_original_mem.json
     echo ">>> Generating binary file for hycube simulator."
-    bash ${MORPHER_MAPPER_PATH}/src/build/cgra_xml_mapper -d $1_PartPredDFG.xml -x 4 -y 4 -j hycube_original_mem.json -i 0 -t HyCUBE_4REG -m 0
+    ${MORPHER_MAPPER_PATH}/build/src/cgra_xml_mapper -d $1_PartPredDFG.xml -x 4 -y 4 -j hycube_original_mem.json -i 0 -t HyCUBE_4REG -m 0
 }
 
-#morpher_mapper generic_0
+function remove_if_exists() {
+    if [ -f $1 ]; then
+        rm $1
+    fi
+}
 
 function morpher_dfg_generator() {
     local MORPHER_PATH=~/Morpher/Morpher_DFG_Generator/build/
@@ -66,32 +70,33 @@ function morpher_dfg_generator() {
     opt -load $MORPHER_PATH/src/libdfggenPass.so -fn generic_0 -nobanks 2 -banksize 2048 -type PartPred -S -o ${instr_ll_file} --dfggen  -enable-new-pm=0 ${opt_ll_file}
 
 
-    if [ -f instrumentation.ll ]; then
-       echo "Skip generating instrumentation.ll"
-    else
-        echo "Code instrumentation, generating instrumentation.ll"
-        clang -target i386-unknown-linux-gnu -c -emit-llvm -S ${MORPHER_SRC_PATH}/src/instrumentation/instrumentation.cpp -o instrumentation.ll
-    fi
+    # if [ -f instrumentation.ll ]; then
+    #    echo "Skip generating instrumentation.ll"
+    # else
+    #     echo "Code instrumentation, generating instrumentation.ll"
+    #     clang -target i386-unknown-linux-gnu -c -emit-llvm -S ${MORPHER_SRC_PATH}/src/instrumentation/instrumentation.cpp -o instrumentation.ll
+    # fi
 
-    echo "llvm link, generating ${final_ll_file}"
-    llvm-link ${instr_ll_file} instrumentation.ll -o ${final_ll_file}
+    # echo "llvm link, generating ${final_ll_file}"
+    # llvm-link ${instr_ll_file} instrumentation.ll -o ${final_ll_file}
 
-    echo "llc, generating ${final_obj_file}"
-    llc -filetype=obj ${final_ll_file} -o ${final_obj_file}
+    # echo "llc, generating ${final_obj_file}"
+    # llc -filetype=obj ${final_ll_file} -o ${final_obj_file}
 
-    echo "generating final binary ${final_bin_file}"
-    clang++ -m32 ${final_obj_file} -o ${final_bin_file}
+    # echo "generating final binary ${final_bin_file}"
+    # clang++ -m32 ${final_obj_file} -o ${final_bin_file}
 
-    echo "Executing ${final_bin_file}"
-    ./${final_bin_file}
+    # echo "Executing ${final_bin_file}"
+    # ./${final_bin_file}
 
 
-    rm ${ll_file}
-    rm ${opt_ll_file}
-    rm ${instr_ll_file}
-    rm ${final_ll_file}
-    rm ${final_obj_file}
-    rm ${final_bin_file}
+    remove_if_exists ${ll_file}
+    remove_if_exists ${opt_ll_file}
+    remove_if_exists ${instr_ll_file}
+    remove_if_exists ${final_ll_file}
+    remove_if_exists ${final_obj_file}
+    remove_if_exists ${final_bin_file}
 }
 
 morpher_dfg_generator 12-accel.ll
+morpher_mapper generic_0
