@@ -58,17 +58,17 @@ function morpher_dfg_generator() {
        echo "Skip generating instrumentation.ll"
     else
         echo "Code instrumentation, generating instrumentation.ll"
-        clang -target i386-unknown-linux-gnu -c -emit-llvm -S ${MORPHER_SRC_PATH}/src/instrumentation/instrumentation.cpp -o instrumentation.ll
+        clang -target x86_64-unknown-linux-gnu -fPIE -c -emit-llvm -S ${MORPHER_SRC_PATH}/src/instrumentation/instrumentation.cpp -o instrumentation.ll
     fi
 
     echo "llvm link, generating ${final_ll_file}"
     llvm-link ${instr_ll_file} instrumentation.ll -o ${final_ll_file}
 
     echo "llc, generating ${final_obj_file}"
-    llc -filetype=obj ${final_ll_file} -o ${final_obj_file}
+    llc -relocation-model=pic -filetype=obj ${final_ll_file} -o ${final_obj_file}
 
     #echo "generating final binary ${final_bin_file}"
-    #clang++ -m32 ${final_obj_file} -o ${final_bin_file}
+    #clang++ -m64 -pie ${final_obj_file} -o ${final_bin_file}
 
     #echo "Executing ${final_bin_file}"
     #./${final_bin_file}
