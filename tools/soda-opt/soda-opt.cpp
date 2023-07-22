@@ -29,7 +29,7 @@
 #include "mlir/Dialect/Arithmetic/Transforms/Passes.h"
 #include "mlir/Dialect/Func/Transforms/Passes.h"
 
-#include "src/easylogging++.h"
+#include "easylogging++.h"
 
 INITIALIZE_EASYLOGGINGPP
 

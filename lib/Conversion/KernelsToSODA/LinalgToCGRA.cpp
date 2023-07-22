@@ -14,7 +14,7 @@
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/Location.h"
-#include "src/easylogging++.h"
+#include "easylogging++.h"
 
 #define DEBUG_TYPE "linalg-to-cgra"
 

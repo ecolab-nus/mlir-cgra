@@ -4,7 +4,7 @@
 #include "morpher/Dialect/Morpher/TransformOps/Utils.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/IR/BlockAndValueMapping.h"
-#include "src/easylogging++.h"
+#include "easylogging++.h"
 #include "llvm/ADT/SmallPtrSet.h"
 
 using namespace mlir;

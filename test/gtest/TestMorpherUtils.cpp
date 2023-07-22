@@ -3,7 +3,7 @@
 //
 
 #include "morpher/Dialect/Morpher/TransformOps/Utils.h"
-#include "src/easylogging++.h"
+#include "easylogging++.h"
 
 using namespace mlir;
 using namespace mlir::morpher;
