@@ -23,16 +23,13 @@ set(SODA_LIB_DIR ${CMAKE_BINARY_DIR}/lib)
 
 list(APPEND CMAKE_MODULE_PATH "${MLIR_CMAKE_DIR}")
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+include(cmake/easyloggingpp.cmake)
 include(TableGen)
 include(AddLLVM)
 include(AddMLIR)
 include(HandleLLVMOptions)
 include(MLIRDetectPythonEnv)
-include(cmake/easyloggingpp.cmake)
-
-include_directories(${CMAKE_BINARY_DIR}/easyloggingpp)
-add_library(libeasyloggingpp STATIC
-        ${CMAKE_BINARY_DIR}/easyloggingpp/src/easylogging++.cc)
 
 if(MLIR_ENABLE_BINDINGS_PYTHON)
   include(MLIRDetectPythonEnv)
@@ -43,10 +40,6 @@ include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${MLIR_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_BINARY_DIR}/include)
-#include_directories(${PROJECT_SOURCE_DIR}/3rdparty/easyloggingpp)
-#add_library(easyloggingpp
-#        ${PROJECT_SOURCE_DIR}/3rdparty/easyloggingpp/src/easylogging++.cc
-#        ${PROJECT_SOURCE_DIR}/3rdparty/easyloggingpp/src/easylogging++.h)
 
 link_directories(${LLVM_BUILD_LIBRARY_DIR})
 add_definitions(${LLVM_DEFINITIONS})
