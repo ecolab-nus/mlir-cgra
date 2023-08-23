@@ -1,0 +1,38 @@
+#include "../PassDetail.h"
+#include "mlir/Conversion/AffineToStandard/AffineToStandard.h"
+#include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
+#include "mlir/Dialect/MemRef/IR/MemRef.h"
+#include "mlir/Dialect/SCF/IR/SCF.h"
+#include "mlir/Transforms/DialectConversion.h"
+#include "mlir/IR/BuiltinDialect.h"
+#include "mlir/IR/BuiltinOps.h"
+
+using namespace mlir;
+
+namespace  {
+
+class AffineToSCF : public AffineToSCFBase<AffineToSCF> {
+    void runOnOperation() override;
+};
+
+void AffineToSCF::runOnOperation() {
+    ConversionTarget target(getContext());
+    target.addLegalDialect<arith::ArithmeticDialect, BuiltinDialect,
+                           memref::MemRefDialect, scf::SCFDialect>();
+    target.addIllegalDialect<AffineDialect>();
+    RewritePatternSet patterns(&getContext());
+    populateAffineToStdConversionPatterns(patterns);
+    if (applyPartialConversion(getOperation(), target, std::move(patterns))
+            .failed())
+        signalPassFailure();
+}
+
+}  // namespace mlir
+
+namespace mlir {
+std::unique_ptr<Pass> createAffineToSCF() {
+  return std::make_unique<AffineToSCF>();
+}
+}
+

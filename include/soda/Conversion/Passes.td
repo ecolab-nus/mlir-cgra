@@ -115,4 +115,33 @@ def ConvertLinalgGenericToCGRA : Pass<"convert-linalg-generic-to-cgra", "func::F
   let dependentDialects = ["soda::SODADialect"];
 }
 
+
+def RelayToAffine : Pass<"relay-to-affine", "mlir::ModuleOp"> {
+let summary = "Lower Relay to Affine.";
+let description = [{
+Convert Relay operations to low-level implementation in Affine dialect.
+}];
+
+let constructor = "mlir::createRelayToAffine()";
+}
+
+def AffineToSCF : Pass<"affine-to-scf", "mlir::ModuleOp"> {
+let summary = "Lower Affine to SCF.";
+let description = [{
+Lower loops in Affine dialect to SCF dialect.
+}];
+
+let constructor = "mlir::createAffineToSCF()";
+}
+
+def SCFToLLVM : Pass<"scf-to-llvm", "mlir::ModuleOp"> {
+let summary = "Lower SCF to LLVM.";
+let description = [{
+Lower loops in SCF dialect to LLVM IR.
+}];
+
+let constructor = "mlir::createSCFToLLVM()";
+let dependentDialects = ["scf::SCFDialect"];
+}
+
 #endif // SODA_CONVERSION_PASSES

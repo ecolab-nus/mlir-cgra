@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.13.4)
 project(soda-opt LANGUAGES CXX C)
 
-set(BUILD_DIR "/home/huiying/llvm-project-16/debug")
-set(LLVM_EXTERN_LIT ${BUILD_DIR}/bin/llvm-lit)
-set(MLIR_DIR ${BUILD_DIR}/lib/cmake/mlir)
-
 set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
 
 set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ standard to conform to")

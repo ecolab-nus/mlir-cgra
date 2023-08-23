@@ -17,6 +17,13 @@
 #include "soda/Conversion/KernelsToSODA/SCFToSODAPass.h"
 
 namespace mlir {
+
+std::unique_ptr<Pass> createRelayToAffine();
+
+std::unique_ptr<Pass> createAffineToSCF();
+
+std::unique_ptr<Pass> createSCFToLLVM();
+
 namespace soda {
 
 /// Generate the code for registering conversion passes.

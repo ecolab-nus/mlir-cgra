@@ -1,0 +1,2 @@
+add_library(MLIRRelayFrontend RelayImporter.cpp OpConverter.cpp)
+target_link_libraries(MLIRRelayFrontend RelayMLIRSupport tvm)
